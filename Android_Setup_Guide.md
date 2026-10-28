@@ -29,10 +29,10 @@ This repository is a starter-code kit, not a complete Unity project or compiled 
 ## 4. Upgrades
 Add `BoatUpgradeSystem` to the boat. UI buttons can call `PurchaseEngineUpgrade`, `PurchaseHandlingUpgrade`, `UnlockSpeedboat`, and `UnlockFishingBoat`. This starter implementation keeps progress in memory only; persistent saving and actual boat selection still need to be implemented.
 
-## 5. Fishing gameplay\nThe generated scene adds a FishingSystem automatically. Tap CAST LINE, wait for the bite, then tap REEL IN before the countdown expires. Landed fish award credits and are tracked by species during the current session. Fish models, tackle selection, persistent records, and detailed fishing hotspots are future upgrades.\n\n## 6. Cinematic graphics direction
+## 5. Boat and fishing upgrades\nThe generated scene attaches BoatUpgradeSystem to the player boat. Use the boat shop to purchase engine/handling upgrades, unlock the speedboat or fishing boat, and select an unlocked boat. The fishing panel includes pole upgrades that shorten the bite wait, extend the reel-in window, and improve rewards. Progress is currently held in memory and resets when the scene restarts.\n\n## 6. Fishing gameplay\nThe generated scene adds a FishingSystem automatically. Tap CAST LINE, wait for the bite, then tap REEL IN before the countdown expires. Landed fish award credits and are tracked by species during the current session. Fish models, tackle selection, persistent records, and detailed fishing hotspots are future upgrades.\n\n## 7. Cinematic graphics direction
 Use a compatible URP water solution with wave normals/reflections, a high-quality skybox, directional sunlight, shoreline terrain, distant islands, detailed licensed boat models, wake/spray particles, and engine sounds. Begin with mobile-friendly settings, LODs, limited shadow distance, and 30 FPS; profile on the target phone. `CinematicOceanMotion` is only subtle visual movement, not a true ocean simulation.
 
-## 7. Build an Android APK
+## 8. Build an Android APK
 1. In Unity, select Android under Build Settings / Build Profiles and switch platform.
 2. Set a unique package identifier, for example `com.yourstudio.saltwaterboatsim`.
 3. Set orientation to Landscape.
