@@ -1,8 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Buy and select boat classes, and upgrade the active boat's performance.
-/// Fishing pole upgrades are handled by FishingSystem.
+/// Buy/select boat classes and upgrade engine and handling performance.
 /// </summary>
 public class BoatUpgradeSystem : MonoBehaviour
 {
@@ -11,22 +10,22 @@ public class BoatUpgradeSystem : MonoBehaviour
     public float speedGainPerLevel = 2f, accelerationGainPerLevel = 0.8f;
     public int handlingLevel = 0, maxHandlingLevel = 4, handlingBaseCost = 250;
     public float turnGainPerLevel = 5f;
-
     [Header("Boat fleet")]
     public bool speedboatUnlocked = false, fishingBoatUnlocked = false;
     public int speedboatCost = 1200, fishingBoatCost = 1800;
     public string activeBoat = "Starter Skiff";
 
     private BoatController boat;
+    private BoatVisualModel visualModel;
     private Vector3 originalHullScale;
     private Renderer hullRenderer;
     private Color originalHullColor = Color.white;
-    private GUIStyle panelStyle;
-    private GUIStyle titleStyle;
+    private GUIStyle panelStyle, titleStyle;
 
     void Awake()
     {
         boat = GetComponent<BoatController>();
+        visualModel = GetComponent<BoatVisualModel>();
         var hull = transform.Find("Hull");
         if (hull)
         {
@@ -37,12 +36,13 @@ public class BoatUpgradeSystem : MonoBehaviour
         ApplyBoatStats();
     }
 
+    void Start() { ApplyBoatStats(); }
+
     public bool PurchaseEngineUpgrade()
     {
         if (!boat || engineLevel >= maxEngineLevel || !Spend(engineBaseCost * (engineLevel + 1))) return false;
         engineLevel++;
-        boat.maxForwardSpeed += speedGainPerLevel;
-        boat.forwardAcceleration += accelerationGainPerLevel;
+        ApplyBoatStats();
         Notify("Engine upgrade level " + engineLevel);
         return true;
     }
@@ -51,7 +51,7 @@ public class BoatUpgradeSystem : MonoBehaviour
     {
         if (!boat || handlingLevel >= maxHandlingLevel || !Spend(handlingBaseCost * (handlingLevel + 1))) return false;
         handlingLevel++;
-        boat.turnSpeed += turnGainPerLevel;
+        ApplyBoatStats();
         Notify("Handling upgrade level " + handlingLevel);
         return true;
     }
@@ -107,11 +107,9 @@ public class BoatUpgradeSystem : MonoBehaviour
         if (rb) rb.mass = mass;
         var hull = transform.Find("Hull");
         if (hull) hull.localScale = hullScale;
-        if (hullRenderer && hullRenderer.sharedMaterial)
-        {
-            // Material is instantiated to avoid changing other objects that share the material.
-            hullRenderer.material.color = hullColor;
-        }
+        if (hullRenderer && hullRenderer.sharedMaterial) hullRenderer.material.color = hullColor;
+        if (!visualModel) visualModel = GetComponent<BoatVisualModel>();
+        if (visualModel) visualModel.Configure(activeBoat);
     }
 
     bool Spend(int cost)
