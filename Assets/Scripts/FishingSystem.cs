@@ -27,7 +27,7 @@ public class FishingSystem : MonoBehaviour
     public float minimumBiteDelay = 4f;
     public float maximumBiteDelay = 12f;
     public float biteWindow = 5f;
-    public float fishingRange = 24f;
+    public float fishingRange = 24f;\n    [Header("Fishing pole progression")]\n    public int poleLevel = 0;\n    public int maxPoleLevel = 5;\n    public int poleUpgradeBaseCost = 250;\n    public float rewardMultiplierPerLevel = 0.15f;\n    public float biteDelayReductionPerLevel = 0.8f;\n    public float biteWindowGainPerLevel = 0.75f;
 
     private readonly List<FishSpecies> species = new List<FishSpecies>();
     private readonly Dictionary<string, int> fishLog = new Dictionary<string, int>();
@@ -41,7 +41,7 @@ public class FishingSystem : MonoBehaviour
     private string lastFish = "";
     private int lastReward;
     private GUIStyle panelStyle;
-    private GUIStyle titleStyle;
+    private GUIStyle titleStyle;\n    private GUIStyle poleStyle;
 
     void Awake()
     {
@@ -60,7 +60,7 @@ public class FishingSystem : MonoBehaviour
             if (timer <= 0f)
             {
                 state = FishingState.Bite;
-                timer = biteWindow;
+                timer = biteWindow + poleLevel * biteWindowGainPerLevel;
                 status = "BITE! Tap REEL IN now!";
             }
         }
@@ -93,14 +93,14 @@ public class FishingSystem : MonoBehaviour
 
         float scale = Mathf.Clamp(Screen.height / 900f, 0.75f, 1.35f);
         float panelW = 310f * scale;
-        float panelH = 220f * scale;
+        float panelH = 278f * scale;
         float x = Screen.width - panelW - 18f;
         GUI.Box(new Rect(x, 14f, panelW, panelH), "");
         GUI.Label(new Rect(x + 12f, 20f, panelW - 24f, 32f), "SALTWATER FISHING", titleStyle);
         GUI.Label(new Rect(x + 12f, 54f, panelW - 24f, 55f), status, panelStyle);
         GUI.Label(new Rect(x + 12f, 112f, panelW - 24f, 26f), "Fish caught: " + totalFish);
         GUI.Label(new Rect(x + 12f, 138f, panelW - 24f, 26f), lastFish == "" ? "Last catch: none yet" : "Last: " + lastFish + " (" + lastWeight.ToString("0.0") + " lb)");
-        GUI.Label(new Rect(x + 12f, 164f, panelW - 24f, 26f), lastFish == "" ? "Explore and build your fishing log." : "Reward: " + lastReward + " credits");
+        GUI.Label(new Rect(x + 12f, 164f, panelW - 24f, 26f), lastFish == "" ? "Explore and build your fishing log." : "Reward: " + lastReward + " credits");\n        GUI.Label(new Rect(x + 12f, 190f, panelW - 24f, 24f), "Fishing pole level: " + poleLevel + "/" + maxPoleLevel);\n        int poleCost = poleUpgradeBaseCost * (poleLevel + 1);\n        string poleLabel = poleLevel >= maxPoleLevel ? "POLE FULLY UPGRADED" : "UPGRADE POLE - " + poleCost + " credits";\n        if (GUI.Button(new Rect(x + 12f, 218f, panelW - 24f, 42f), poleLabel)) PurchasePoleUpgrade();
 
         float buttonW = 210f * scale;
         float buttonH = 62f * scale;
@@ -123,7 +123,7 @@ public class FishingSystem : MonoBehaviour
         }
         if (!boat) { status = "Boat not found. Restart the scene."; return; }
         state = FishingState.Waiting;
-        timer = UnityEngine.Random.Range(minimumBiteDelay, maximumBiteDelay);
+        float delayReduction = poleLevel * biteDelayReductionPerLevel;\n        timer = UnityEngine.Random.Range(Mathf.Max(1f, minimumBiteDelay - delayReduction), Mathf.Max(2f, maximumBiteDelay - delayReduction));
         status = "Line cast. Watch the water for a bite...";
         if (!bobber)
         {
@@ -154,7 +154,7 @@ public class FishingSystem : MonoBehaviour
         FishSpecies fish = ChooseFish();
         lastWeight = UnityEngine.Random.Range(fish.minWeight, fish.maxWeight);
         lastFish = fish.name;
-        lastReward = Mathf.Max(1, Mathf.RoundToInt(lastWeight * fish.creditsPerPound));
+        lastReward = Mathf.Max(1, Mathf.RoundToInt(lastWeight * fish.creditsPerPound * (1f + poleLevel * rewardMultiplierPerLevel)));
         totalFish++;
         if (!fishLog.ContainsKey(fish.name)) fishLog[fish.name] = 0;
         fishLog[fish.name]++;
@@ -165,7 +165,7 @@ public class FishingSystem : MonoBehaviour
         RemoveBobber();
     }
 
-    FishSpecies ChooseFish()
+    public bool PurchasePoleUpgrade()\n    {\n        if (poleLevel >= maxPoleLevel || !BoatGameManager.Instance) return false;\n        int cost = poleUpgradeBaseCost * (poleLevel + 1);\n        if (BoatGameManager.Instance.credits < cost)\n        {\n            status = "Not enough credits for the next pole upgrade.";\n            return false;\n        }\n        BoatGameManager.Instance.credits -= cost;\n        poleLevel++;\n        status = "Fishing pole upgraded to level " + poleLevel + "!";\n        BoatGameManager.Instance.latestMessage = status;\n        return true;\n    }\n\n    FishSpecies ChooseFish()
     {
         float total = 0f;
         foreach (var fish in species) total += fish.rarityWeight;
