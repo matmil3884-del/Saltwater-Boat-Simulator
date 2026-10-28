@@ -43,7 +43,6 @@ PlayerSettings:
   m_BuildTargetGraphicsJobMode: []
   m_BuildTargetLightmapEncodingQuality: []
   m_BuildTargetLoadStoreDebugModeTest: []
-  m_BuildTarget VulkanEnablePreTransform: []
   m_BuildTargetEnableVulkanSupport: []
   m_BuildTargetGraphicsAPIs: []
   m_BuildTargetVRSettings: []
@@ -62,7 +61,6 @@ PlayerSettings:
   stripEngineCode: 1
   il2cppCodeGeneration: 2
   il2cppStacktraceInformation: 1
-  managedStrippingLevel: {}
   apiCompatibilityLevel: 6
   scriptingBackend: 1
   il2cppCompilerConfiguration: 0
