@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!129 &1
+PlayerSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 26
+  productGUID: 00000000000000000000000000000000
+  AndroidProfiler: 0
+  AndroidFilterTouchesWhenObscured: 0
+  defaultScreenOrientation: 3
+  targetDevice: 2
+  useOnDemandResources: 0
+  accelerometerFrequency: 60
+  companyName: Saltwater Studio
+  productName: Saltwater Fishing Simulator
+  defaultCursor: {fileID: 0}
+  cursorHotspot: {x: 0, y: 0}
+  m_SplashScreenBackgroundColor: {r: 0.02, g: 0.12, b: 0.18, a: 1}
+  m_ShowUnitySplashScreen: 1
+  m_ShowUnitySplashLogo: 1
+  applicationIdentifier:
+    Android: com.saltwaterstudio.fishingsimulator
+  bundleVersion: 0.1
+  bundleVersionCode: 1
+  AndroidMinSdkVersion: 23
+  AndroidTargetSdkVersion: 0
+  scriptingBackend:
+    Android: 1
+  il2cppCompilerConfiguration:
+    Android: 0
+  managedStrippingLevel:
+    Android: 1
+  apiCompatibilityLevelPerPlatform:
+    Android: 6
+  activeInputHandler: 2
+  androidBuildSystem: 0
+  AndroidTargetArchitectures: 2
+  m_BuildTargetIcons: []
+  m_BuildTargetPlatformIcons: []
+  m_BuildTargetBatching: []
+  m_BuildTargetShaderSettings: []
+  m_BuildTargetGraphicsJobs: []
+  m_BuildTargetGraphicsJobMode: []
+  m_BuildTargetLightmapEncodingQuality: []
+  m_BuildTargetLoadStoreDebugModeTest: []
+  m_BuildTarget VulkanEnablePreTransform: []
+  m_BuildTargetEnableVulkanSupport: []
+  m_BuildTargetGraphicsAPIs: []
+  m_BuildTargetVRSettings: []
+  m_BuildTargetEnableNativePlatformBackendsForUI: []
+  m_BuildTargetShaderPrecisionModel: []
+  m_BuildTargetPropertyOverrides: []
+  scriptingDefineSymbols:
+    Android: 
+  additionalCompilerArguments: {}
+  platformArchitecture:
+    Android: 0
+  scriptingRuntimeVersion: 1
+  gcIncremental: 1
+  allowUnsafeCode: 0
+  usePlayerLog: 1
+  stripEngineCode: 1
+  il2cppCodeGeneration: 2
+  il2cppStacktraceInformation: 1
+  managedStrippingLevel: {}
+  apiCompatibilityLevel: 6
+  scriptingBackend: 1
+  il2cppCompilerConfiguration: 0
+  m_ActiveBuildTarget: Android
