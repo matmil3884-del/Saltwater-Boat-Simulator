@@ -42,7 +42,9 @@ public static class SaltwaterBuild
         body.drag = 0.4f;
         body.angularDrag = 1.5f;
         body.interpolation = RigidbodyInterpolation.Interpolate;
-        var controller = boat.AddComponent<BoatController>();\n        boat.AddComponent<BoatUpgradeSystem>();
+        var controller = boat.AddComponent<BoatController>();
+        boat.AddComponent<BoatVisualModel>();
+        boat.AddComponent<BoatUpgradeSystem>();
         var buoyancy = boat.AddComponent<BoatBuoyancy>();
         buoyancy.waterLevel = 0f;
         buoyancy.buoyancyStrength = 16f;
