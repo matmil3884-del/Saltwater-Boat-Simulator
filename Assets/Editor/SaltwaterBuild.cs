@@ -88,6 +88,11 @@ public static class SaltwaterBuild
         var manager = new GameObject("GameManager");
         manager.AddComponent<BoatGameManager>();
 
+        // Fishing gameplay is part of the default generated scene.
+        var fishingObject = new GameObject("FishingSystem");
+        var fishing = fishingObject.AddComponent<FishingSystem>();
+        fishing.boat = boat.transform;
+
         CreateBuoy(new Vector3(0f, 0.8f, 28f), "Harbor Checkpoint", 250, new Color(1f, 0.72f, 0.12f));
         CreateBuoy(new Vector3(22f, 0.8f, 52f), "Coastal Mission", 400, new Color(0.1f, 1f, 0.55f));
         var explore = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -175,7 +180,7 @@ public static class SaltwaterBuild
     public static void BuildAndroid()
     {
         CreatePrototypeScene();
-        PlayerSettings.productName = "Saltwater Boat Simulator";
+        PlayerSettings.productName = "Saltwater Fishing Simulator";
         PlayerSettings.companyName = "Saltwater Studio";
         PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "com.saltwaterstudio.boatsimulator");
         PlayerSettings.defaultInterfaceOrientation = UIOrientation.LandscapeLeft;
@@ -183,7 +188,7 @@ public static class SaltwaterBuild
         Directory.CreateDirectory("BuildOutput");
         var options = new BuildPlayerOptions {
             scenes = new[] { ScenePath },
-            locationPathName = "BuildOutput/SaltwaterBoatSimulator.apk",
+            locationPathName = "BuildOutput/SaltwaterFishingSimulator.apk",
             target = BuildTarget.Android,
             options = BuildOptions.None
         };
