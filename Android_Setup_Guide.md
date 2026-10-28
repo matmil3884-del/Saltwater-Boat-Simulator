@@ -1,4 +1,4 @@
-# Android setup guide
+# Saltwater Fishing Simulator — Android setup guide
 
 ## Important
 This repository is a starter-code kit, not a complete Unity project or compiled APK. A Unity Editor environment is required to assemble the scene, test the physics, and build an Android package. GitHub Codespaces by itself is not a drop-in Unity Editor.
@@ -29,10 +29,10 @@ This repository is a starter-code kit, not a complete Unity project or compiled 
 ## 4. Upgrades
 Add `BoatUpgradeSystem` to the boat. UI buttons can call `PurchaseEngineUpgrade`, `PurchaseHandlingUpgrade`, `UnlockSpeedboat`, and `UnlockFishingBoat`. This starter implementation keeps progress in memory only; persistent saving and actual boat selection still need to be implemented.
 
-## 5. Cinematic graphics direction
+## 5. Fishing gameplay\nThe generated scene adds a FishingSystem automatically. Tap CAST LINE, wait for the bite, then tap REEL IN before the countdown expires. Landed fish award credits and are tracked by species during the current session. Fish models, tackle selection, persistent records, and detailed fishing hotspots are future upgrades.\n\n## 6. Cinematic graphics direction
 Use a compatible URP water solution with wave normals/reflections, a high-quality skybox, directional sunlight, shoreline terrain, distant islands, detailed licensed boat models, wake/spray particles, and engine sounds. Begin with mobile-friendly settings, LODs, limited shadow distance, and 30 FPS; profile on the target phone. `CinematicOceanMotion` is only subtle visual movement, not a true ocean simulation.
 
-## 6. Build an Android APK
+## 7. Build an Android APK
 1. In Unity, select Android under Build Settings / Build Profiles and switch platform.
 2. Set a unique package identifier, for example `com.yourstudio.saltwaterboatsim`.
 3. Set orientation to Landscape.
