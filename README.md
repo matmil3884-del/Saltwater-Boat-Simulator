@@ -1,33 +1,35 @@
 # Saltwater Boat Simulator
 
-A Unity starter project for an Android-focused, cinematic 3D boating game: open-water exploration, missions, boat handling, credits, upgrades, and unlockable boat classes.
+A Unity starter project for an Android-focused boating game: open-water exploration, missions, boat handling, credits, upgrades, and unlockable boat classes.
 
 ## Project status
 
-**Prototype source code only — not a finished game or APK yet.** The scripts are a foundation. A Unity Editor environment is still needed to create the scene, add boat/ocean assets, configure physics and touch UI, test on a device, and build an APK.
+**Prototype source code only — not a finished game or APK yet.** The scripts and Editor scene generator are a foundation. A successful Unity build and device test are still required. Current boat, island, and water visuals are placeholders, not cinematic-quality final assets.
 
-## Included scripts
+## Included
 
-- `Assets/Scripts/BoatController.cs` — basic throttle, reverse, steering, and speed limits
-- `Assets/Scripts/BoatBuoyancy.cs` — simple multi-point buoyancy approximation
-- `Assets/Scripts/BoatCameraFollow.cs` — smooth chase camera
-- `Assets/Scripts/MobileBoatControls.cs` and `HoldButton.cs` — touch hold controls
-- `Assets/Scripts/BoatGameManager.cs` — credits and mission messages
-- `Assets/Scripts/MissionBuoy.cs` and `ExplorationZone.cs` — exploration rewards
-- `Assets/Scripts/BoatUpgradeSystem.cs` — engine/handling upgrades and boat unlocks
-- `Assets/Scripts/CinematicOceanMotion.cs` — subtle visual motion (not realistic wave simulation)
+- Boat movement and simple buoyancy approximation
+- Smooth chase camera and mobile touch controls
+- Credits, mission buoys, and exploration rewards
+- Engine/handling upgrades and boat-unlock progression
+- Editor menu command to generate a starter scene
+- GitHub Actions workflow to attempt an Android APK build
 
-## Start here
+## Android build setup
 
-1. Use Unity 2022.3 LTS or a compatible Unity 6 version with Android Build Support, Android SDK & NDK Tools, and OpenJDK.
-2. Create a **3D (URP)** project.
-3. Copy this repository's `Assets` folder into the Unity project.
-4. Follow [Android_Setup_Guide.md](Android_Setup_Guide.md) to assemble a test scene and wire touch controls.
-5. Test the prototype before attempting an APK build.
+The build uses Unity 2022.3.62f1 and GameCI. It requires a valid Unity license and GitHub Actions secrets.
 
-## Design target
+1. In GitHub, open **Settings → Secrets and variables → Actions** for this repository.
+2. Add repository secrets named `UNITY_EMAIL` and `UNITY_PASSWORD` for the Unity account used by GameCI. Optionally add `UNITY_LICENSE` if you already have a valid Unity license file.
+3. Never paste credentials into source files, issues, or chat. Only add them in GitHub's secret-value fields. Use a Unity account and license eligible for CI use.
+4. Open **Actions → Build Saltwater Android APK → Run workflow**.
+5. If the run fails, open the run and inspect the first failing step/log; a successful build should provide the `Saltwater-Boat-Simulator-APK` artifact.
 
-Landscape Android; open-world coastal exploration; speedboats and fishing boats unlocked through progression; mobile-friendly cinematic visuals. Realistic water, boat models, islands, sounds, menus, and persistent saves must be added as the project develops.
+The old `unity-request-activation-file` action is deprecated and fails, so it has been removed from the setup flow. See the current [GameCI activation guide](https://game.ci/docs/github/activation/).
+
+## Important limitations
+
+A build may still fail because of Unity license/account restrictions, package or editor compatibility, or project compilation issues. GitHub Actions does not provide a visual Unity Editor. The starter scene generator creates simple primitive placeholder geometry; realistic ocean shaders, detailed boat models, wakes/spray, audio, menus, persistent saves, and actual boat selection remain future work.
 
 ## Security
 
