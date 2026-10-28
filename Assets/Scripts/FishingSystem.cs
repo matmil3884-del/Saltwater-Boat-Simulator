@@ -161,7 +161,7 @@ public class FishingSystem : MonoBehaviour
             body.transform.localScale = new Vector3(0.75f + i * 0.13f, 0.25f + i * 0.03f, 0.34f + i * 0.08f);
             SetColor(body, i == 0 ? new Color(0.63f, 0.70f, 0.61f) : i == 1 ? new Color(0.76f, 0.47f, 0.22f) : new Color(0.37f, 0.60f, 0.64f));
             RemoveCollider(body);
-            var tail = GameObject.CreatePrimitive(PrimitiveType.Cone);
+            var tail = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             tail.name = "Fish Tail";
             tail.transform.SetParent(fish.transform, false);
             tail.transform.localPosition = new Vector3(0f, 0f, -0.40f - i * 0.04f);
