@@ -42,6 +42,14 @@ jobs:
           fi
           echo "Unity credential secrets are present; values will not be printed."
 
+      - name: Prepare Unity Hub path expected by setup action
+        shell: bash
+        run: |
+          sudo mkdir -p /opt/unityhub
+          if [ -x /usr/bin/unityhub ]; then
+            sudo ln -sf /usr/bin/unityhub /opt/unityhub/unityhub
+          fi
+
       - name: Install Unity 2022.3.62f1 with Android module
         uses: buildalon/unity-setup@v2
         id: unity-setup
