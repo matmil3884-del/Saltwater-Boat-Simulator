@@ -39,17 +39,16 @@ jobs:
             fi
           done
 
-          if [ -z "$UNITY_LICENSE" ] && [ -z "$UNITY_SERIAL" ]; then
-            echo "::error::Set either UNITY_LICENSE (contents of a valid Unity .ulf license file) or UNITY_SERIAL in GitHub Actions secrets."
+          if [ -n "$UNITY_SERIAL" ]; then
+            echo "UNITY_SERIAL is configured."
+          elif [ -z "$UNITY_LICENSE" ]; then
+            echo "::error::Missing Unity license. Set UNITY_LICENSE to the full contents of a valid Unity .ulf license file, or configure a supported UNITY_SERIAL."
             missing=1
-          fi
-
-          if [ -n "$UNITY_LICENSE" ]; then
-            if printf '%s' "$UNITY_LICENSE" | grep -qE '^(\s*<\?xml|\s*<root|\s*<UnityLicense|\s*<License)'; then
-              echo "UNITY_LICENSE appears to contain XML license data."
-            else
-              echo "::warning::UNITY_LICENSE is set, but its content does not look like an XML .ulf license file. GameCI may reject it. Secret contents were not printed."
-            fi
+          elif ! printf '%s' "$UNITY_LICENSE" | grep -qE '(<\?xml|<root|<UnityLicense|<License|<unityLicense)'; then
+            echo "::error::UNITY_LICENSE exists but does not look like a Unity .ulf license file. Replace that secret with the full text contents of the valid .ulf file; do not enter a file path, password, activation request (.alf), or placeholder. Secret contents were not printed."
+            missing=1
+          else
+            echo "UNITY_LICENSE has a license-file-like structure; Unity will validate it during activation."
           fi
 
           if [ "$missing" -ne 0 ]; then
