@@ -23,24 +23,38 @@ jobs:
           lfs: true
           submodules: recursive
 
-      - name: Check required Unity credentials are configured
+      - name: Validate Unity credentials without exposing secrets
         shell: bash
         env:
           UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
         run: |
           missing=0
-          for key in UNITY_USERNAME UNITY_PASSWORD UNITY_LICENSE; do
+          for key in UNITY_USERNAME UNITY_PASSWORD; do
             if [ -z "${!key}" ]; then
-              echo "::error::Missing GitHub Actions secret: $key. Add it under Settings > Secrets and variables > Actions."
+              echo "::error::Missing GitHub Actions secret: $key."
               missing=1
             fi
           done
+
+          if [ -z "$UNITY_LICENSE" ] && [ -z "$UNITY_SERIAL" ]; then
+            echo "::error::Set either UNITY_LICENSE (contents of a valid Unity .ulf license file) or UNITY_SERIAL in GitHub Actions secrets."
+            missing=1
+          fi
+
+          if [ -n "$UNITY_LICENSE" ]; then
+            if printf '%s' "$UNITY_LICENSE" | grep -qE '^(\s*<\?xml|\s*<root|\s*<UnityLicense|\s*<License)'; then
+              echo "UNITY_LICENSE appears to contain XML license data."
+            else
+              echo "::warning::UNITY_LICENSE is set, but its content does not look like an XML .ulf license file. GameCI may reject it. Secret contents were not printed."
+            fi
+          fi
+
           if [ "$missing" -ne 0 ]; then
             exit 1
           fi
-          echo "Unity credential and license secrets are present; values will not be printed."
 
       - name: Build Android APK with GameCI
         uses: game-ci/unity-builder@v4
@@ -48,6 +62,7 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_USERNAME }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
         with:
           projectPath: .
           unityVersion: 2022.3.62f1
@@ -63,13 +78,11 @@ jobs:
           mkdir -p BuildOutput
           find . -type f -name 'SaltwaterFishingSimulator.apk' -not -path './BuildOutput/*' -exec cp {} BuildOutput/ \; || true
 
-      - name: Upload APK and build logs
+      - name: Upload APK artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Saltwater-Boat-Simulator-Android-Build
-          path: |
-            BuildOutput/SaltwaterFishingSimulator.apk
-            /github/home/.config/unity3d/**
+          path: BuildOutput/SaltwaterFishingSimulator.apk
           if-no-files-found: warn
           retention-days: 7
