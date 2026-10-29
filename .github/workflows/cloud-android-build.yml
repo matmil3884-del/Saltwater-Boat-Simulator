@@ -42,13 +42,20 @@ jobs:
           fi
           echo "Unity credential secrets are present; values will not be printed."
 
-      - name: Prepare Unity Hub path expected by setup action
+      - name: Install Unity Hub at the path expected by setup action
         shell: bash
         run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y ca-certificates curl gnupg
+          curl -fsSL https://hub.unity3d.com/linux/keys/public | gpg --dearmor | sudo tee /usr/share/keyrings/unityhub-archive-keyring.gpg >/dev/null
+          echo "deb [signed-by=/usr/share/keyrings/unityhub-archive-keyring.gpg] https://hub-dist.unity3d.com/artifactory/hub-debian-prod-local stable main" | sudo tee /etc/apt/sources.list.d/unityhub.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install -y unityhub
           sudo mkdir -p /opt/unityhub
-          if [ -x /usr/bin/unityhub ]; then
-            sudo ln -sf /usr/bin/unityhub /opt/unityhub/unityhub
-          fi
+          sudo ln -sf /usr/bin/unityhub /opt/unityhub/unityhub
+          test -x /opt/unityhub/unityhub
+          ls -l /opt/unityhub/unityhub
 
       - name: Install Unity 2022.3.62f1 with Android module
         uses: buildalon/unity-setup@v2
