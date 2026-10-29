@@ -46,7 +46,7 @@ jobs:
         uses: buildalon/unity-setup@v2
         id: unity-setup
         with:
-          version-file: ProjectSettings/ProjectVersion.txt
+          version-file: None
           unity-version: 2022.3.62f1
           build-targets: Android
           cache-installation: true
