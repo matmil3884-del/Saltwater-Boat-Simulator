@@ -1,5 +1,4 @@
 name: Build Saltwater Boat Simulator APK (Cloud Personal License)
-# Re-trigger cloud build after Unity credential secrets are configured.
 
 on:
   workflow_dispatch:
@@ -16,7 +15,7 @@ permissions:
 jobs:
   build-android:
     runs-on: ubuntu-22.04
-    timeout-minutes: 90
+    timeout-minutes: 120
     steps:
       - name: Checkout project
         uses: actions/checkout@v4
@@ -42,61 +41,33 @@ jobs:
           fi
           echo "Unity credential secrets are present; values will not be printed."
 
-      - name: Install Unity Hub at the path expected by setup action
-        shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y ca-certificates curl gnupg
-          curl -fsSL https://hub.unity3d.com/linux/keys/public | gpg --dearmor | sudo tee /usr/share/keyrings/unityhub-archive-keyring.gpg >/dev/null
-          echo "deb [signed-by=/usr/share/keyrings/unityhub-archive-keyring.gpg] https://hub-dist.unity3d.com/artifactory/hub-debian-prod-local stable main" | sudo tee /etc/apt/sources.list.d/unityhub.list >/dev/null
-          sudo apt-get update
-          sudo apt-get install -y unityhub
-          sudo mkdir -p /opt/unityhub
-          sudo ln -sf /usr/bin/unityhub /opt/unityhub/unityhub
-          test -x /opt/unityhub/unityhub
-          ls -l /opt/unityhub/unityhub
-
-      - name: Install Unity 2022.3.62f1 with Android module
-        uses: buildalon/unity-setup@v2
-        id: unity-setup
-        with:
-          version-file: None
-          unity-version: 2022.3.62f1
-          build-targets: Android
-          cache-installation: true
-
-      - name: Activate Unity Personal license
-        uses: buildalon/activate-unity-license@v2
-        with:
-          license: Personal
-          username: ${{ secrets.UNITY_USERNAME }}
-          password: ${{ secrets.UNITY_PASSWORD }}
-
-      - name: Build APK
-        shell: bash
+      - name: Build Android APK with GameCI
+        uses: game-ci/unity-builder@v4
         env:
-          UNITY_EDITOR_PATH: ${{ steps.unity-setup.outputs.unity-editor-path }}
-          UNITY_PROJECT_PATH: ${{ steps.unity-setup.outputs.unity-project-path }}
-        run: |
-          set -euo pipefail
-          mkdir -p "$GITHUB_WORKSPACE/BuildOutput"
-          "$UNITY_EDITOR_PATH" \
-            -batchmode \
-            -nographics \
-            -quit \
-            -projectPath "$UNITY_PROJECT_PATH" \
-            -buildTarget Android \
-            -executeMethod SaltwaterBuild.BuildAndroid \
-            -logFile "$GITHUB_WORKSPACE/BuildOutput/unity-build.log"
+          UNITY_EMAIL: ${{ secrets.UNITY_USERNAME }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: .
+          unityVersion: 2022.3.62f1
+          targetPlatform: Android
+          buildMethod: SaltwaterBuild.BuildAndroid
+          customParameters: -nographics
+          allowDirtyBuild: true
 
-      - name: Upload APK and build log
+      - name: Prepare APK artifact
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p BuildOutput
+          find . -type f -name 'SaltwaterFishingSimulator.apk' -not -path './BuildOutput/*' -exec cp {} BuildOutput/ \; || true
+
+      - name: Upload APK and build logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Saltwater-Boat-Simulator-Android-Build
           path: |
             BuildOutput/SaltwaterFishingSimulator.apk
-            BuildOutput/unity-build.log
+            /github/home/.config/unity3d/**
           if-no-files-found: warn
           retention-days: 7
