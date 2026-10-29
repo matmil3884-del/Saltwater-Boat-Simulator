@@ -1,4 +1,5 @@
 name: Build Saltwater Boat Simulator APK (Cloud Personal License)
+# Re-trigger cloud build after Unity credential secrets are configured.
 
 on:
   workflow_dispatch:
