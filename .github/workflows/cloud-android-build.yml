@@ -61,7 +61,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p BuildOutput
-          find . -type f -name 'SaltwaterFishingSimulator.apk' -not -path './BuildOutput/*' -exec cp {} BuildOutput/ \\; || true
+          find . -type f -name 'SaltwaterFishingSimulator.apk' -not -path './BuildOutput/*' -exec cp {} BuildOutput/ \; || true
 
       - name: Upload APK and build logs
         if: always()
