@@ -7,7 +7,9 @@ An Android-focused Unity boating and fishing game prototype. Explore coastal wat
 - Starter skiff, unlockable speedboat, and dedicated fishing boat
 - Boat selection changes hull appearance, handling, acceleration, top speed, and mass
 - Engine and handling upgrades purchased with in-game credits
-- Five catchable saltwater species with variable weights and weighted rarity
+- Ten catchable species split between saltwater and freshwater habitats, with variable weights and weighted rarity
+- Switchable freshwater and saltwater fishing modes in the fishing panel
+- Freshwater species: largemouth bass, smallmouth bass, crappie, bluegill, and channel catfish
 - Fishing pole upgrades reduce wait times, increase the bite window, and improve credit rewards
 - Mobile touch controls, simple buoyancy, chase camera, mission buoys, and exploration rewards
 - Visible bobber, fishing line, and animated underwater fish silhouettes
@@ -31,7 +33,8 @@ These are expansion goals, not claims that every feature is already implemented.
 ## How to play in the current prototype
 
 1. Use LEFT, RIGHT, THROTTLE, and REVERSE to drive.
-2. Tap CAST LINE, wait for the bite, then tap REEL IN before the timer expires.
+2. Choose FRESHWATER or SALTWATER in the fishing panel.
+3. Tap CAST LINE, wait for the bite, then tap REEL IN before the timer expires.
 3. Land fish and complete buoy missions to earn credits.
 4. Use the BOAT SHOP & UPGRADES panel to improve your engine and handling, unlock boats, and select your active boat.
 5. Use the fishing panel's UPGRADE POLE button to improve bite timing and catch rewards.
