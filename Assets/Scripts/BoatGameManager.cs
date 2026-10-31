@@ -4,7 +4,7 @@ public class BoatGameManager : MonoBehaviour
 {
     public static BoatGameManager Instance { get; private set; }
     public int credits = 0;
-    public string latestMessage = "Cast a line, land fish, earn credits, and explore the coast.";
+    public string latestMessage = "Explore the water, catch fish, earn credits, and upgrade your boat.";
 
     void Awake()
     {
@@ -21,7 +21,7 @@ public class BoatGameManager : MonoBehaviour
 
     void OnGUI()
     {
-        GUI.Box(new Rect(14, 14, 370, 82), "SALTWATER FISHING SIMULATOR");
+        GUI.Box(new Rect(14, 14, 370, 82), "BOATING & FISHING SIMULATOR");
         GUI.Label(new Rect(26, 40, 340, 20), "Credits: " + credits);
         GUI.Label(new Rect(26, 62, 340, 20), latestMessage);
     }
