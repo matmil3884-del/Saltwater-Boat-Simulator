@@ -13,7 +13,8 @@ An Android-focused Unity boating and fishing game prototype. Explore coastal wat
 - Freshwater species: largemouth bass, smallmouth bass, crappie, bluegill, and channel catfish
 - Fishing pole upgrades reduce wait times, increase the bite window, and improve credit rewards
 - Mobile touch controls, simple buoyancy, chase camera, mission buoys, and exploration rewards
-- Visible bobber, fishing line, and animated underwater fish silhouettes
+- Visible bobber and curved fishing line, with animated freshwater fish models, fins, and eyes approaching the bait
+- Bobber dips on a bite, a hook-setting step, and an active fish-fighting phase with line-tension management
 - Editor scene generator and GitHub Actions Android APK workflow
 
 ## Expanded game direction
