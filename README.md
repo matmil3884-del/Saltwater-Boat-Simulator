@@ -9,6 +9,7 @@ An Android-focused Unity boating and fishing game prototype. Explore coastal wat
 - Engine and handling upgrades purchased with in-game credits
 - Ten catchable species split between saltwater and freshwater habitats, with variable weights and weighted rarity
 - Switchable freshwater and saltwater fishing modes in the fishing panel
+- Procedurally generated freshwater lake destination with grassy banks, a wooden fishing dock, shoreline reeds, shallow cove, and deep bass-hole discovery zones
 - Freshwater species: largemouth bass, smallmouth bass, crappie, bluegill, and channel catfish
 - Fishing pole upgrades reduce wait times, increase the bite window, and improve credit rewards
 - Mobile touch controls, simple buoyancy, chase camera, mission buoys, and exploration rewards
@@ -19,7 +20,7 @@ An Android-focused Unity boating and fishing game prototype. Explore coastal wat
 
 The project is being expanded into a broader boating and fishing simulator while keeping the existing Unity project and progress. Planned gameplay includes:
 
-- Freshwater lakes and rivers alongside saltwater coastal and offshore areas
+- More detailed freshwater lakes and rivers alongside saltwater coastal and offshore areas
 - More boats: bass boats, pontoons, center consoles, offshore boats, and personal watercraft
 - More fish species with habitat-specific availability, size ranges, rarity, and trophy catches
 - Fishing equipment: rods, reels, line strength, hooks, bait, and lures
