@@ -28,11 +28,14 @@ public class FishingSystem : MonoBehaviour
 
     private readonly List<FishSpecies> species = new List<FishSpecies>();
     private readonly Dictionary<string, int> fishLog = new Dictionary<string, int>();
-    private enum FishingState { Ready, Waiting, Bite }
+    private enum FishingState { Ready, Waiting, Bite, Fighting }
     private bool freshwaterMode = false;
     private FishingState state = FishingState.Ready;
     private float timer;
     private string status = "Find a quiet patch of water and cast your line.";
+    private float fishFightTimer;
+    private float lineTension = 0.35f;
+    private bool bobberSubmerged;
     private GameObject bobber, lineObject;
     private LineRenderer fishingLine;
     private readonly List<Transform> visibleFish = new List<Transform>();
@@ -78,12 +81,29 @@ public class FishingSystem : MonoBehaviour
                 RemoveFishingVisuals();
             }
         }
+        else if (state == FishingState.Fighting)
+        {
+            fishFightTimer -= Time.deltaTime;
+            lineTension = Mathf.Clamp01(lineTension + Mathf.Sin(Time.time * 3.4f) * Time.deltaTime * 0.28f + Time.deltaTime * 0.10f);
+            if (lineTension > 0.94f)
+            {
+                state = FishingState.Ready;
+                status = "The line snapped! Ease off and try another cast.";
+                RemoveFishingVisuals();
+            }
+            else if (fishFightTimer <= 0f) LandFish();
+        }
 
         if (bobber && boat)
         {
             Vector3 target = boat.position + boat.forward * 7f + boat.right * 2.5f;
             target.y = 0.12f + Mathf.Sin(Time.time * 2.2f) * 0.08f;
             bobber.transform.position = Vector3.Lerp(bobber.transform.position, target, Time.deltaTime * 2.5f);
+            if (state == FishingState.Bite || state == FishingState.Fighting)
+            {
+                bobberSubmerged = Mathf.Sin(Time.time * 11f) > 0.15f;
+                target.y = bobberSubmerged ? -0.22f : 0.02f;
+            }
             UpdateFishingLine();
             AnimateFish();
         }
@@ -112,19 +132,20 @@ public class FishingSystem : MonoBehaviour
         GUI.Label(new Rect(x + 12f, 142f, panelW - 24f, 24f), "Fish caught: " + totalFish);
         GUI.Label(new Rect(x + 12f, 166f, panelW - 24f, 24f), lastFish == "" ? "Last catch: none yet" : "Last: " + lastFish + " (" + lastWeight.ToString("0.0") + " lb)");
         GUI.Label(new Rect(x + 12f, 190f, panelW - 24f, 24f), lastFish == "" ? "Explore and build your fishing log." : "Reward: " + lastReward + " credits");
-        GUI.Label(new Rect(x + 12f, 214f, panelW - 24f, 24f), "Fishing pole level: " + poleLevel + "/" + maxPoleLevel);
+        GUI.Label(new Rect(x + 12f, 214f, panelW - 24f, 24f), state == FishingState.Fighting ? "Line tension: " + Mathf.RoundToInt(lineTension * 100f) + "%" : "Fishing pole level: " + poleLevel + "/" + maxPoleLevel);
         int poleCost = poleUpgradeBaseCost * (poleLevel + 1);
         string poleLabel = poleLevel >= maxPoleLevel ? "POLE FULLY UPGRADED" : "UPGRADE POLE - " + poleCost + " credits";
         if (GUI.Button(new Rect(x + 12f, 242f, panelW - 24f, 42f), poleLabel)) PurchasePoleUpgrade();
 
         float buttonW = 210f * scale, buttonH = 62f * scale;
         Rect button = new Rect(Screen.width - buttonW - 22f, Screen.height - buttonH - 24f, buttonW, buttonH);
-        string label = state == FishingState.Ready ? "CAST LINE" : state == FishingState.Waiting ? "REEL IN" : "REEL IN! " + Mathf.CeilToInt(timer) + "s";
+        string label = state == FishingState.Ready ? "CAST LINE" : state == FishingState.Waiting ? "REEL IN" : state == FishingState.Bite ? "SET HOOK! " + Mathf.CeilToInt(timer) + "s" : "FIGHT! " + Mathf.CeilToInt(fishFightTimer) + "s";
         if (GUI.Button(button, label))
         {
             if (state == FishingState.Ready) CastLine();
             else if (state == FishingState.Waiting) RetrieveLine();
-            else CatchFish();
+            else if (state == FishingState.Bite) SetHook();
+            else if (state == FishingState.Fighting) EaseLineTension();
         }
     }
 
@@ -140,7 +161,7 @@ public class FishingSystem : MonoBehaviour
         state = FishingState.Waiting;
         float reduction = poleLevel * biteDelayReductionPerLevel;
         timer = UnityEngine.Random.Range(Mathf.Max(1f, minimumBiteDelay - reduction), Mathf.Max(2f, maximumBiteDelay - reduction));
-        status = "Line cast. Watch the bobber and look for fish below the surface...";
+        status = "Cast! Fish are approaching the bait. Watch for the bobber to dip.";
         CreateFishingVisuals();
     }
 
@@ -172,9 +193,26 @@ public class FishingSystem : MonoBehaviour
             var body = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             body.name = "Fish Body";
             body.transform.SetParent(fish.transform, false);
-            body.transform.localScale = new Vector3(0.75f + i * 0.13f, 0.25f + i * 0.03f, 0.34f + i * 0.08f);
-            SetColor(body, i == 0 ? new Color(0.63f, 0.70f, 0.61f) : i == 1 ? new Color(0.76f, 0.47f, 0.22f) : new Color(0.37f, 0.60f, 0.64f));
+            body.transform.localScale = new Vector3(0.72f + i * 0.16f, 0.27f + i * 0.035f, 0.34f + i * 0.07f);
+            Color fishColor = freshwaterMode
+                ? (i == 0 ? new Color(0.30f, 0.48f, 0.20f) : i == 1 ? new Color(0.72f, 0.57f, 0.25f) : new Color(0.43f, 0.54f, 0.62f))
+                : (i == 0 ? new Color(0.63f, 0.70f, 0.61f) : i == 1 ? new Color(0.76f, 0.47f, 0.22f) : new Color(0.37f, 0.60f, 0.64f));
+            SetColor(body, fishColor);
             RemoveCollider(body);
+            var dorsal = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            dorsal.name = "Fish Dorsal Fin";
+            dorsal.transform.SetParent(fish.transform, false);
+            dorsal.transform.localPosition = new Vector3(0f, 0.14f, 0.02f);
+            dorsal.transform.localScale = new Vector3(0.34f, 0.16f, 0.22f);
+            SetColor(dorsal, fishColor * 0.82f);
+            RemoveCollider(dorsal);
+            var eye = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            eye.name = "Fish Eye";
+            eye.transform.SetParent(fish.transform, false);
+            eye.transform.localPosition = new Vector3(0.22f, 0.035f, 0.16f);
+            eye.transform.localScale = Vector3.one * 0.055f;
+            SetColor(eye, Color.black);
+            RemoveCollider(eye);
             var tail = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             tail.name = "Fish Tail";
             tail.transform.SetParent(fish.transform, false);
@@ -211,8 +249,10 @@ public class FishingSystem : MonoBehaviour
             Transform fish = visibleFish[i];
             if (!fish) continue;
             float phase = Time.time * (1.1f + i * 0.23f) + i * 2.1f;
-            fish.position = bobber.transform.position + new Vector3(Mathf.Sin(phase) * (1.2f + i * 0.45f), -0.55f - i * 0.22f, Mathf.Cos(phase * 0.7f) * (1.0f + i * 0.4f));
-            fish.rotation = Quaternion.Euler(0f, Mathf.Sin(phase) * 25f + 180f, Mathf.Sin(phase * 2f) * 8f);
+            float approach = state == FishingState.Waiting ? Mathf.Lerp(4.5f, 1.0f, Mathf.PingPong(Time.time * 0.10f + i * 0.2f, 1f)) : 1.1f;
+            float dart = state == FishingState.Bite ? Mathf.Sin(Time.time * 13f + i) * 0.7f : 0f;
+            fish.position = bobber.transform.position + new Vector3(Mathf.Sin(phase) * (approach + i * 0.25f) + dart, -0.62f - i * 0.18f, Mathf.Cos(phase * 0.7f) * (approach * 0.7f));
+            fish.rotation = Quaternion.Euler(0f, Mathf.Atan2(Mathf.Cos(phase), Mathf.Sin(phase)) * Mathf.Rad2Deg + 90f, Mathf.Sin(phase * 2f) * 8f);
         }
     }
 
@@ -223,7 +263,23 @@ public class FishingSystem : MonoBehaviour
         RemoveFishingVisuals();
     }
 
-    void CatchFish()
+    void SetHook()
+    {
+        state = FishingState.Fighting;
+        fishFightTimer = UnityEngine.Random.Range(2.5f, 5.5f);
+        lineTension = 0.30f;
+        status = "Fish hooked! Tap REEL IN to control the fight. Don't let tension max out.";
+    }
+
+    void EaseLineTension()
+    {
+        lineTension = Mathf.Max(0.08f, lineTension - 0.22f);
+        fishFightTimer -= 0.45f;
+        status = "Good control! Line tension: " + Mathf.RoundToInt(lineTension * 100f) + "%";
+        if (fishFightTimer <= 0f) LandFish();
+    }
+
+    void LandFish()
     {
         FishSpecies fish = ChooseFish();
         lastWeight = UnityEngine.Random.Range(fish.minWeight, fish.maxWeight);
@@ -263,6 +319,7 @@ public class FishingSystem : MonoBehaviour
             roll -= fish.rarityWeight;
             if (roll <= 0f) return fish;
         }
+        foreach (var fish in species) if (fish.freshwater == freshwaterMode) return fish;
         return species[0];
     }
 
