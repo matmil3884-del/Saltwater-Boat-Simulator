@@ -106,10 +106,82 @@ public static class SaltwaterBuild
         explore.AddComponent<ExplorationZone>();
         Object.DestroyImmediate(explore.GetComponent<MeshRenderer>());
 
+        // Freshwater lake area: a second navigable destination east of the coastal start.
+        CreateFreshwaterLake();
+
         CreateMobileUI(boat);
         EditorSceneManager.SaveScene(scene, ScenePath);
         EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
-        Debug.Log("Saltwater prototype scene created at " + ScenePath);
+        Debug.Log("Boating & Fishing prototype scene created at " + ScenePath);
+    }
+
+    static void CreateFreshwaterLake()
+    {
+        Vector3 center = new Vector3(250f, 0f, 0f);
+        var lake = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        lake.name = "Freshwater Lake - Deep Water";
+        lake.transform.position = center;
+        lake.transform.localScale = new Vector3(75f, 1f, 75f);
+        SetMaterial(lake, new Color(0.035f, 0.28f, 0.25f));
+        Object.DestroyImmediate(lake.GetComponent<Collider>());
+
+        // Low grassy shoreline banks frame the lake and leave open boat entrances.
+        MakeBank(new Vector3(250f, -0.15f, 78f), new Vector3(155f, 1.2f, 9f));
+        MakeBank(new Vector3(250f, -0.15f, -78f), new Vector3(155f, 1.2f, 9f));
+        MakeBank(new Vector3(172f, -0.15f, 0f), new Vector3(9f, 1.2f, 145f));
+        MakeBank(new Vector3(328f, -0.15f, 0f), new Vector3(9f, 1.2f, 145f));
+
+        // Simple wooden dock with a walkable deck and support posts.
+        var dock = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        dock.name = "Bass Lake Fishing Dock";
+        dock.transform.position = new Vector3(250f, 0.8f, -62f);
+        dock.transform.localScale = new Vector3(4f, 0.35f, 22f);
+        SetMaterial(dock, new Color(0.38f, 0.23f, 0.12f));
+        for (int i = 0; i < 4; i++)
+        {
+            var post = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            post.name = "Dock Support";
+            post.transform.position = new Vector3(250f + (i % 2 == 0 ? -1.6f : 1.6f), -0.1f, -70f + (i / 2) * 16f);
+            post.transform.localScale = new Vector3(0.35f, 1.2f, 0.35f);
+            SetMaterial(post, new Color(0.25f, 0.16f, 0.1f));
+        }
+
+        // Shallow coves and deeper bass habitat are marked as discovery/fishing areas.
+        CreateLakeZone(new Vector3(205f, 0.7f, -25f), new Vector3(13f, 2f, 13f), "Shallow Weed Cove", 175);
+        CreateLakeZone(new Vector3(280f, 0.7f, 22f), new Vector3(16f, 2f, 16f), "Deep Bass Hole", 300);
+        CreateLakeZone(new Vector3(250f, 0.7f, -55f), new Vector3(9f, 2f, 9f), "Dock Fishing Spot", 125);
+
+        // Reeds provide visible shoreline landmarks.
+        for (int i = 0; i < 12; i++)
+        {
+            var reed = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            reed.name = "Shore Reeds";
+            reed.transform.position = new Vector3(190f + (i % 6) * 5f, 1.1f, 61f + (i / 6) * 3f);
+            reed.transform.localScale = new Vector3(0.12f, 1.1f, 0.12f);
+            SetMaterial(reed, new Color(0.25f, 0.42f, 0.16f));
+        }
+    }
+
+    static void MakeBank(Vector3 position, Vector3 scale)
+    {
+        var bank = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        bank.name = "Grassy Lake Shore";
+        bank.transform.position = position;
+        bank.transform.localScale = scale;
+        SetMaterial(bank, new Color(0.24f, 0.38f, 0.17f));
+    }
+
+    static void CreateLakeZone(Vector3 position, Vector3 scale, string title, int reward)
+    {
+        var zone = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        zone.name = title + " Discovery";
+        zone.transform.position = position;
+        zone.transform.localScale = scale;
+        zone.GetComponent<Collider>().isTrigger = true;
+        SetMaterial(zone, new Color(0.2f, 0.85f, 0.65f, 0.25f));
+        zone.AddComponent<ExplorationZone>().zoneName = title;
+        zone.GetComponent<ExplorationZone>().firstVisitReward = reward;
+        Object.DestroyImmediate(zone.GetComponent<MeshRenderer>());
     }
 
     static void MakeIsland(Vector3 position, Vector3 scale)
@@ -182,7 +254,7 @@ public static class SaltwaterBuild
     public static void BuildAndroid()
     {
         CreatePrototypeScene();
-        PlayerSettings.productName = "Saltwater Fishing Simulator";
+        PlayerSettings.productName = "Boating & Fishing Simulator";
         PlayerSettings.companyName = "Saltwater Studio";
         PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "com.saltwaterstudio.boatsimulator");
         PlayerSettings.defaultInterfaceOrientation = UIOrientation.LandscapeLeft;
