@@ -188,43 +188,92 @@ public class FishingSystem : MonoBehaviour
 
         for (int i = 0; i < 3; i++)
         {
-            var fish = new GameObject("Visible Fish " + (i + 1));
-            fish.transform.SetParent(transform, false);
-            var body = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            body.name = "Fish Body";
-            body.transform.SetParent(fish.transform, false);
-            body.transform.localScale = new Vector3(0.72f + i * 0.16f, 0.27f + i * 0.035f, 0.34f + i * 0.07f);
-            Color fishColor = freshwaterMode
-                ? (i == 0 ? new Color(0.30f, 0.48f, 0.20f) : i == 1 ? new Color(0.72f, 0.57f, 0.25f) : new Color(0.43f, 0.54f, 0.62f))
-                : (i == 0 ? new Color(0.63f, 0.70f, 0.61f) : i == 1 ? new Color(0.76f, 0.47f, 0.22f) : new Color(0.37f, 0.60f, 0.64f));
-            SetColor(body, fishColor);
-            RemoveCollider(body);
-            var dorsal = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            dorsal.name = "Fish Dorsal Fin";
-            dorsal.transform.SetParent(fish.transform, false);
-            dorsal.transform.localPosition = new Vector3(0f, 0.14f, 0.02f);
-            dorsal.transform.localScale = new Vector3(0.34f, 0.16f, 0.22f);
-            SetColor(dorsal, fishColor * 0.82f);
-            RemoveCollider(dorsal);
-            var eye = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            eye.name = "Fish Eye";
-            eye.transform.SetParent(fish.transform, false);
-            eye.transform.localPosition = new Vector3(0.22f, 0.035f, 0.16f);
-            eye.transform.localScale = Vector3.one * 0.055f;
-            SetColor(eye, Color.black);
-            RemoveCollider(eye);
-            var tail = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            tail.name = "Fish Tail";
-            tail.transform.SetParent(fish.transform, false);
-            tail.transform.localPosition = new Vector3(0f, 0f, -0.40f - i * 0.04f);
-            tail.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
-            tail.transform.localScale = new Vector3(0.22f, 0.22f, 0.18f);
-            SetColor(tail, i == 0 ? new Color(0.63f, 0.70f, 0.61f) : i == 1 ? new Color(0.76f, 0.47f, 0.22f) : new Color(0.37f, 0.60f, 0.64f));
-            RemoveCollider(tail);
-            visibleFish.Add(fish.transform);
+            FishSpecies speciesToShow = ChooseFish();
+            Transform fish = CreateFishModel(speciesToShow, i);
+            visibleFish.Add(fish);
         }
         UpdateFishingLine();
         AnimateFish();
+    }
+
+    Transform CreateFishModel(FishSpecies speciesToShow, int index)
+    {
+        var root = new GameObject("Visible " + speciesToShow.name);
+        root.transform.SetParent(transform, false);
+        float size = UnityEngine.Random.Range(0.82f, 1.22f);
+        Color bodyColor;
+        if (speciesToShow.name == "Largemouth Bass") bodyColor = new Color(0.34f, 0.48f, 0.20f);
+        else if (speciesToShow.name == "Smallmouth Bass") bodyColor = new Color(0.56f, 0.55f, 0.31f);
+        else if (speciesToShow.name == "Crappie") bodyColor = new Color(0.48f, 0.53f, 0.58f);
+        else if (speciesToShow.name == "Bluegill") bodyColor = new Color(0.30f, 0.48f, 0.66f);
+        else if (speciesToShow.name == "Channel Catfish") bodyColor = new Color(0.40f, 0.43f, 0.42f);
+        else bodyColor = new Color(0.66f, 0.62f, 0.43f);
+        bool deepBody = speciesToShow.name == "Bluegill" || speciesToShow.name == "Crappie";
+        bool catfish = speciesToShow.name == "Channel Catfish";
+
+        var body = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        body.name = "Body";
+        body.transform.SetParent(root.transform, false);
+        body.transform.localScale = new Vector3((deepBody ? 0.56f : 0.92f) * size, (deepBody ? 0.42f : 0.34f) * size, 0.42f * size);
+        SetColor(body, bodyColor); RemoveCollider(body);
+
+        var tail = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        tail.name = "Tail";
+        tail.transform.SetParent(root.transform, false);
+        tail.transform.localPosition = new Vector3(0f, 0f, -0.48f * size);
+        tail.transform.localScale = new Vector3(0.34f * size, 0.42f * size, 0.10f * size);
+        SetColor(tail, bodyColor * 0.82f); RemoveCollider(tail);
+
+        var dorsal = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        dorsal.name = "Dorsal Fin";
+        dorsal.transform.SetParent(root.transform, false);
+        dorsal.transform.localPosition = new Vector3(0f, 0.22f * size, 0.02f);
+        dorsal.transform.localScale = new Vector3((deepBody ? 0.45f : 0.68f) * size, 0.16f * size, 0.20f * size);
+        SetColor(dorsal, bodyColor * 0.72f); RemoveCollider(dorsal);
+
+        for (int side = -1; side <= 1; side += 2)
+        {
+            var eye = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            eye.name = "Eye";
+            eye.transform.SetParent(root.transform, false);
+            eye.transform.localPosition = new Vector3(0.16f * size, 0.07f * size, 0.13f * size * side);
+            eye.transform.localScale = Vector3.one * 0.065f * size;
+            SetColor(eye, Color.black); RemoveCollider(eye);
+
+            var fin = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            fin.name = "Pectoral Fin";
+            fin.transform.SetParent(root.transform, false);
+            fin.transform.localPosition = new Vector3(-0.04f * size, -0.08f * size, 0.19f * size * side);
+            fin.transform.localScale = new Vector3(0.18f * size, 0.07f * size, 0.12f * size);
+            SetColor(fin, bodyColor * 0.75f); RemoveCollider(fin);
+        }
+
+        if (speciesToShow.name.Contains("Bass"))
+        {
+            for (int spot = 0; spot < 5; spot++)
+            {
+                var mark = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                mark.name = "Bass Lateral Mark";
+                mark.transform.SetParent(root.transform, false);
+                mark.transform.localPosition = new Vector3(-0.22f * size + spot * 0.10f * size, -0.015f * size, 0.205f * size);
+                mark.transform.localScale = new Vector3(0.10f * size, 0.055f * size, 0.018f * size);
+                SetColor(mark, new Color(0.18f, 0.29f, 0.12f)); RemoveCollider(mark);
+            }
+        }
+        if (catfish)
+        {
+            for (int whisker = -1; whisker <= 1; whisker++)
+            {
+                var barbel = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                barbel.name = "Catfish Whisker";
+                barbel.transform.SetParent(root.transform, false);
+                barbel.transform.localPosition = new Vector3(0.34f * size, -0.06f * size, whisker * 0.10f * size);
+                barbel.transform.localRotation = Quaternion.Euler(0f, 0f, 72f);
+                barbel.transform.localScale = new Vector3(0.018f * size, 0.16f * size, 0.018f * size);
+                SetColor(barbel, new Color(0.18f, 0.19f, 0.17f)); RemoveCollider(barbel);
+            }
+        }
+        return root.transform;
     }
 
     void UpdateFishingLine()
@@ -248,9 +297,10 @@ public class FishingSystem : MonoBehaviour
         {
             Transform fish = visibleFish[i];
             if (!fish) continue;
-            float phase = Time.time * (1.1f + i * 0.23f) + i * 2.1f;
-            float approach = state == FishingState.Waiting ? Mathf.Lerp(4.5f, 1.0f, Mathf.PingPong(Time.time * 0.10f + i * 0.2f, 1f)) : 1.1f;
-            float dart = state == FishingState.Bite ? Mathf.Sin(Time.time * 13f + i) * 0.7f : 0f;
+            float speciesSpeed = fish.name.Contains("Catfish") ? 0.72f : fish.name.Contains("Bluegill") ? 1.75f : fish.name.Contains("Bass") ? 1.25f : 1.05f;
+            float phase = Time.time * speciesSpeed + i * 2.1f;
+            float approach = state == FishingState.Waiting ? Mathf.Lerp(5.2f, 1.0f, Mathf.PingPong(Time.time * 0.09f + i * 0.2f, 1f)) : 1.1f;
+            float dart = state == FishingState.Bite ? Mathf.Sin(Time.time * 13f + i) * 0.85f : 0f;
             fish.position = bobber.transform.position + new Vector3(Mathf.Sin(phase) * (approach + i * 0.25f) + dart, -0.62f - i * 0.18f, Mathf.Cos(phase * 0.7f) * (approach * 0.7f));
             fish.rotation = Quaternion.Euler(0f, Mathf.Atan2(Mathf.Cos(phase), Mathf.Sin(phase)) * Mathf.Rad2Deg + 90f, Mathf.Sin(phase * 2f) * 8f);
         }
