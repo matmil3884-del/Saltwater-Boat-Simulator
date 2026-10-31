@@ -12,7 +12,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: Saltwater Studio
-  productName: Saltwater Fishing Simulator
+  productName: Boating & Fishing Simulator
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.02, g: 0.12, b: 0.18, a: 1}
@@ -36,18 +36,13 @@ PlayerSettings:
   androidBuildSystem: 0
   AndroidTargetArchitectures: 2
   m_BuildTargetIcons: []
-  m_BuildTargetPlatformIcons: []
   m_BuildTargetBatching: []
-  m_BuildTargetShaderSettings: []
   m_BuildTargetGraphicsJobs: []
   m_BuildTargetGraphicsJobMode: []
-  m_BuildTargetLightmapEncodingQuality: []
-  m_BuildTargetLoadStoreDebugModeTest: []
   m_BuildTargetEnableVulkanSupport: []
   m_BuildTargetGraphicsAPIs: []
   m_BuildTargetVRSettings: []
   m_BuildTargetEnableNativePlatformBackendsForUI: []
-  m_BuildTargetShaderPrecisionModel: []
   m_BuildTargetPropertyOverrides: []
   scriptingDefineSymbols:
     Android: 
@@ -62,6 +57,4 @@ PlayerSettings:
   il2cppCodeGeneration: 2
   il2cppStacktraceInformation: 1
   apiCompatibilityLevel: 6
-  scriptingBackend: 1
-  il2cppCompilerConfiguration: 0
   m_ActiveBuildTarget: Android
