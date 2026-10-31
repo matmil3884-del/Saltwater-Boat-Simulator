@@ -14,8 +14,9 @@ public class FishingSystem : MonoBehaviour
         public float minWeight, maxWeight;
         public int creditsPerPound;
         public float rarityWeight;
-        public FishSpecies(string fishName, float min, float max, int value, float rarity)
-        { name = fishName; minWeight = min; maxWeight = max; creditsPerPound = value; rarityWeight = rarity; }
+        public bool freshwater;
+        public FishSpecies(string fishName, float min, float max, int value, float rarity, bool isFreshwater = false)
+        { name = fishName; minWeight = min; maxWeight = max; creditsPerPound = value; rarityWeight = rarity; freshwater = isFreshwater; }
     }
 
     public Transform boat;
@@ -28,6 +29,7 @@ public class FishingSystem : MonoBehaviour
     private readonly List<FishSpecies> species = new List<FishSpecies>();
     private readonly Dictionary<string, int> fishLog = new Dictionary<string, int>();
     private enum FishingState { Ready, Waiting, Bite }
+    private bool freshwaterMode = false;
     private FishingState state = FishingState.Ready;
     private float timer;
     private string status = "Find a quiet patch of water and cast your line.";
@@ -47,6 +49,11 @@ public class FishingSystem : MonoBehaviour
         species.Add(new FishSpecies("Sheepshead", 1f, 10f, 9, 18f));
         species.Add(new FishSpecies("Flounder", 0.5f, 7f, 12, 9f));
         species.Add(new FishSpecies("Tarpon", 8f, 55f, 16, 3f));
+        species.Add(new FishSpecies("Largemouth Bass", 0.5f, 12f, 11, 35f, true));
+        species.Add(new FishSpecies("Smallmouth Bass", 0.5f, 7f, 12, 20f, true));
+        species.Add(new FishSpecies("Crappie", 0.2f, 4f, 10, 22f, true));
+        species.Add(new FishSpecies("Bluegill", 0.1f, 2f, 8, 17f, true));
+        species.Add(new FishSpecies("Channel Catfish", 1f, 25f, 13, 6f, true));
     }
 
     void Update()
@@ -90,18 +97,25 @@ public class FishingSystem : MonoBehaviour
             titleStyle = new GUIStyle(GUI.skin.label) { fontSize = Mathf.Max(18, Screen.height / 38), fontStyle = FontStyle.Bold, normal = { textColor = Color.white } };
         }
         float scale = Mathf.Clamp(Screen.height / 900f, 0.75f, 1.35f);
-        float panelW = 310f * scale, panelH = 278f * scale;
+        float panelW = 310f * scale, panelH = 326f * scale;
         float x = Screen.width - panelW - 18f;
         GUI.Box(new Rect(x, 14f, panelW, panelH), "");
-        GUI.Label(new Rect(x + 12f, 20f, panelW - 24f, 32f), "SALTWATER FISHING", titleStyle);
-        GUI.Label(new Rect(x + 12f, 54f, panelW - 24f, 55f), status, panelStyle);
-        GUI.Label(new Rect(x + 12f, 112f, panelW - 24f, 26f), "Fish caught: " + totalFish);
-        GUI.Label(new Rect(x + 12f, 138f, panelW - 24f, 26f), lastFish == "" ? "Last catch: none yet" : "Last: " + lastFish + " (" + lastWeight.ToString("0.0") + " lb)");
-        GUI.Label(new Rect(x + 12f, 164f, panelW - 24f, 26f), lastFish == "" ? "Explore and build your fishing log." : "Reward: " + lastReward + " credits");
-        GUI.Label(new Rect(x + 12f, 190f, panelW - 24f, 24f), "Fishing pole level: " + poleLevel + "/" + maxPoleLevel);
+        GUI.Label(new Rect(x + 12f, 20f, panelW - 24f, 32f), "BOATING & FISHING", titleStyle);
+        string waterLabel = freshwaterMode ? "FRESHWATER - SWITCH TO SALTWATER" : "SALTWATER - SWITCH TO FRESHWATER";
+        if (GUI.Button(new Rect(x + 12f, 52f, panelW - 24f, 34f), waterLabel))
+        {
+            if (state != FishingState.Ready) RetrieveLine();
+            freshwaterMode = !freshwaterMode;
+            status = freshwaterMode ? "Freshwater selected. Try bass, crappie, bluegill, or catfish." : "Saltwater selected. Head offshore for coastal species.";
+        }
+        GUI.Label(new Rect(x + 12f, 90f, panelW - 24f, 50f), status, panelStyle);
+        GUI.Label(new Rect(x + 12f, 142f, panelW - 24f, 24f), "Fish caught: " + totalFish);
+        GUI.Label(new Rect(x + 12f, 166f, panelW - 24f, 24f), lastFish == "" ? "Last catch: none yet" : "Last: " + lastFish + " (" + lastWeight.ToString("0.0") + " lb)");
+        GUI.Label(new Rect(x + 12f, 190f, panelW - 24f, 24f), lastFish == "" ? "Explore and build your fishing log." : "Reward: " + lastReward + " credits");
+        GUI.Label(new Rect(x + 12f, 214f, panelW - 24f, 24f), "Fishing pole level: " + poleLevel + "/" + maxPoleLevel);
         int poleCost = poleUpgradeBaseCost * (poleLevel + 1);
         string poleLabel = poleLevel >= maxPoleLevel ? "POLE FULLY UPGRADED" : "UPGRADE POLE - " + poleCost + " credits";
-        if (GUI.Button(new Rect(x + 12f, 218f, panelW - 24f, 42f), poleLabel)) PurchasePoleUpgrade();
+        if (GUI.Button(new Rect(x + 12f, 242f, panelW - 24f, 42f), poleLabel)) PurchasePoleUpgrade();
 
         float buttonW = 210f * scale, buttonH = 62f * scale;
         Rect button = new Rect(Screen.width - buttonW - 22f, Screen.height - buttonH - 24f, buttonW, buttonH);
@@ -239,9 +253,16 @@ public class FishingSystem : MonoBehaviour
     FishSpecies ChooseFish()
     {
         float total = 0f;
-        foreach (var fish in species) total += fish.rarityWeight;
+        foreach (var fish in species)
+            if (fish.freshwater == freshwaterMode) total += fish.rarityWeight;
+
         float roll = UnityEngine.Random.Range(0f, total);
-        foreach (var fish in species) { roll -= fish.rarityWeight; if (roll <= 0f) return fish; }
+        foreach (var fish in species)
+        {
+            if (fish.freshwater != freshwaterMode) continue;
+            roll -= fish.rarityWeight;
+            if (roll <= 0f) return fish;
+        }
         return species[0];
     }
 
